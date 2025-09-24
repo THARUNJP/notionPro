@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MoreVertical } from 'lucide-react';
 
 interface RowActionsProps {
@@ -8,9 +8,28 @@ interface RowActionsProps {
 
 const RowActions: React.FC<RowActionsProps> = ({ onEdit, onDelete }) => {
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
 
   return (
-    <div className="relative">
+    <div className="relative inline-block text-left" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
         className="p-2 rounded-full hover:bg-gray-100"
@@ -19,7 +38,9 @@ const RowActions: React.FC<RowActionsProps> = ({ onEdit, onDelete }) => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-24 bg-white border border-gray-200 shadow-lg rounded-md z-10">
+        <div
+          className="absolute top-full right-0 mt-1 w-28 bg-white border border-gray-200 shadow-lg rounded-md z-[9999]"
+        >
           <button
             onClick={() => {
               onEdit();
@@ -43,5 +64,6 @@ const RowActions: React.FC<RowActionsProps> = ({ onEdit, onDelete }) => {
     </div>
   );
 };
+
 
 export default RowActions;
